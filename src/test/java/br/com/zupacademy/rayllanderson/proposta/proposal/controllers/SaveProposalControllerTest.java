@@ -116,8 +116,7 @@ class SaveProposalControllerTest {
                 .andExpect(jsonPath("fieldErrors.*", hasSize(1)))
                 .andExpect(jsonPath("fieldErrors[0].*", hasSize(2)))
                 .andExpect(jsonPath("fieldErrors[0].field").value(expectedField))
-                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty())
-                .andReturn();
+                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty());
     }
 
     @Test
@@ -138,8 +137,7 @@ class SaveProposalControllerTest {
                 .andExpect(jsonPath("fieldErrors.*", hasSize(1)))
                 .andExpect(jsonPath("fieldErrors[0].*", hasSize(2)))
                 .andExpect(jsonPath("fieldErrors[0].field").value(expectedField))
-                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty())
-                .andReturn();
+                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty());
     }
 
     @Test
@@ -160,8 +158,7 @@ class SaveProposalControllerTest {
                 .andExpect(jsonPath("fieldErrors.*", hasSize(1)))
                 .andExpect(jsonPath("fieldErrors[0].*", hasSize(2)))
                 .andExpect(jsonPath("fieldErrors[0].field").value(expectedField))
-                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty())
-                .andReturn();
+                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty());
     }
 
     @Test
@@ -182,8 +179,7 @@ class SaveProposalControllerTest {
                 .andExpect(jsonPath("fieldErrors.*", hasSize(1)))
                 .andExpect(jsonPath("fieldErrors[0].*", hasSize(2)))
                 .andExpect(jsonPath("fieldErrors[0].field").value(expectedField))
-                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty())
-                .andReturn();
+                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty());
     }
 
     @Test
@@ -204,7 +200,64 @@ class SaveProposalControllerTest {
                 .andExpect(jsonPath("fieldErrors.*", hasSize(1)))
                 .andExpect(jsonPath("fieldErrors[0].*", hasSize(2)))
                 .andExpect(jsonPath("fieldErrors[0].field").value(expectedField))
-                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty())
-                .andReturn();
+                .andExpect(jsonPath("fieldErrors[0].message").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return 422 (unprocessable entity) when CPF already exists")
+    void shouldReturn422WhenCPFExists() throws Exception {
+
+        //salvando uma proposta com cpf válido
+        saveProposalWithCPF();
+
+        //tentando salvar uma proposta com o cpf da proposta salva acima (Já existente)
+        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
+
+        String expectedField = "document";
+
+        mockMvc.perform(
+                post(this.uri)
+                        .content(this.gson.toJson(request))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("globalErrorMessages").isArray())
+                .andExpect(jsonPath("globalErrorMessages.*", hasSize(1)))
+                .andExpect(jsonPath("globalErrorMessages[0]").value(containsString(expectedField)));
+    }
+
+    @Test
+    @DisplayName("Should return 422 (unprocessable entity) when CNPJ already exists")
+    void shouldReturn422WhenCNPJExists() throws Exception {
+
+        //salvando uma proposta com CNPJ válido
+        saveProposalWithCNPJ();
+
+        //tentando salvar uma proposta com o CNPJ da proposta salva acima (Já existente)
+        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCNPJ();
+
+        String expectedField = "document";
+
+        mockMvc.perform(
+                post(this.uri)
+                        .content(this.gson.toJson(request))
+                        .contentType(MediaType.APPLICATION_JSON)
+        ).andDo(print())
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("globalErrorMessages").isArray())
+                .andExpect(jsonPath("globalErrorMessages.*", hasSize(1)))
+                .andExpect(jsonPath("globalErrorMessages[0]").value(containsString(expectedField)));
+    }
+
+    private void saveProposalWithCPF() throws Exception {
+        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
+        mockMvc.perform(post(this.uri).content(this.gson.toJson(request)).contentType(MediaType.APPLICATION_JSON));
+    }
+
+    private void saveProposalWithCNPJ() throws Exception {
+        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCNPJ();
+        mockMvc.perform(post(this.uri).content(this.gson.toJson(request)).contentType(MediaType.APPLICATION_JSON));
     }
 }

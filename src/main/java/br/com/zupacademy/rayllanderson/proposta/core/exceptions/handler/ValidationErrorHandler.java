@@ -1,10 +1,10 @@
-package br.com.zupacademy.rayllanderson.proposta.core.handler;
+package br.com.zupacademy.rayllanderson.proposta.core.exceptions.handler;
 
+import br.com.zupacademy.rayllanderson.proposta.core.exceptions.UnprocessableEntityException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,6 +35,14 @@ public class ValidationErrorHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalStateException.class)
     public ValidationErrorOutputDto handleIllegalStateException(IllegalStateException exception){
+        ValidationErrorOutputDto validationErrors = new ValidationErrorOutputDto();
+        validationErrors.addError(exception.getMessage());
+        return validationErrors;
+    }
+
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(UnprocessableEntityException.class)
+    public ValidationErrorOutputDto handleUnprocessableEntityException(UnprocessableEntityException exception){
         ValidationErrorOutputDto validationErrors = new ValidationErrorOutputDto();
         validationErrors.addError(exception.getMessage());
         return validationErrors;
