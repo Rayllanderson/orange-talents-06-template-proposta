@@ -1,4 +1,4 @@
-package br.com.zupacademy.rayllanderson.proposta.core.handler;
+package br.com.zupacademy.rayllanderson.proposta.core.exceptions.handler;
 
 import java.util.ArrayList;
 import java.util.List;
