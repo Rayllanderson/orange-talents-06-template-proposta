@@ -1,6 +1,8 @@
 package br.com.zupacademy.rayllanderson.proposta.proposal.model;
 
 import br.com.zupacademy.rayllanderson.proposta.core.annotations.CPFOrCNPJ;
+import br.com.zupacademy.rayllanderson.proposta.proposal.enums.ProposalStatus;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -35,7 +37,11 @@ public class Proposal {
     @Column(nullable = false)
     private Double salary;
 
-    public Proposal() {
+    @Enumerated(EnumType.STRING)
+    private ProposalStatus status;
+
+    @Deprecated
+    private Proposal() {
     }
 
     public Proposal(@NotBlank @CPFOrCNPJ String document, @NotBlank String email, @NotBlank String name,
@@ -49,5 +55,26 @@ public class Proposal {
 
     public Long getId() {
         return id;
+    }
+
+    public String getDocument() {
+        return document;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Deve ser usado para setar o status da proposta
+     * depois de recebe-la de outro serviço externo.
+     */
+    public void setStatus(@NotNull ProposalStatus status) {
+        Assert.notNull(status, "Status não pode ser nulo");
+        this.status = status;
+    }
+
+    public ProposalStatus getStatus() {
+        return status;
     }
 }

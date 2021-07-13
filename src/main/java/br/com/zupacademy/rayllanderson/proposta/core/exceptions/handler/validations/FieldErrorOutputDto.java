@@ -1,4 +1,4 @@
-package br.com.zupacademy.rayllanderson.proposta.core.exceptions.handler;
+package br.com.zupacademy.rayllanderson.proposta.core.exceptions.handler.validations;
 
 public class FieldErrorOutputDto {
 

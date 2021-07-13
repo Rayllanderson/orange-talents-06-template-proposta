@@ -1,4 +1,4 @@
-package br.com.zupacademy.rayllanderson.proposta.core.exceptions.handler;
+package br.com.zupacademy.rayllanderson.proposta.core.exceptions.handler.validations;
 
 import br.com.zupacademy.rayllanderson.proposta.core.exceptions.UnprocessableEntityException;
 import org.springframework.beans.factory.annotation.Autowired;
