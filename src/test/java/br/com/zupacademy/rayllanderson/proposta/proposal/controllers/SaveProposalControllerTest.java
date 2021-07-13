@@ -1,6 +1,7 @@
 package br.com.zupacademy.rayllanderson.proposta.proposal.controllers;
 
 import br.com.zupacademy.rayllanderson.proposta.proposal.creators.ProposalPostRequestCreator;
+import br.com.zupacademy.rayllanderson.proposta.proposal.enums.ProposalStatus;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
 import br.com.zupacademy.rayllanderson.proposta.proposal.requests.ProposalPostRequest;
 import br.com.zupacademy.rayllanderson.proposta.utils.HeaderUtils;
@@ -68,6 +69,7 @@ class SaveProposalControllerTest {
         Proposal savedProposal = manager.find(Proposal.class, returnedId);
 
         assertThat(savedProposal).isNotNull();
+        assertThat(savedProposal.getStatus()).isEqualTo(ProposalStatus.ELIGIBLE);
     }
 
     @Test
@@ -96,6 +98,36 @@ class SaveProposalControllerTest {
         Proposal savedProposal = manager.find(Proposal.class, returnedId);
 
         assertThat(savedProposal).isNotNull();
+        assertThat(savedProposal.getStatus()).isEqualTo(ProposalStatus.ELIGIBLE);
+    }
+
+    @Test
+    @DisplayName("Should save a new Proposal not eligible with CNPJ when successful")
+    void shouldSaveANotEligibleProposalWithCNPJ() throws Exception {
+        ProposalPostRequest request = ProposalPostRequestCreator.createANotEligibleProposalToBeSavedWithCNPJ();
+
+        String contextPath = "http://localhost";
+        MvcResult mvcResult = mockMvc.perform(
+                post(this.uri)
+                        .content(this.gson.toJson(request))
+                        .contentType(MediaType.APPLICATION_JSON)
+        )
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.LOCATION, contextPath + "/proposals/1"))
+                .andReturn();
+
+        String returnedHeader = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
+
+        assertThat(returnedHeader).isNotNull().isNotBlank();
+
+        long returnedId = HeaderUtils.getReturnedId(returnedHeader);
+
+        assertThat(returnedId).isNotNull();
+
+        Proposal savedProposal = manager.find(Proposal.class, returnedId);
+
+        assertThat(savedProposal).isNotNull();
+        assertThat(savedProposal.getStatus()).isEqualTo(ProposalStatus.NOT_ELIGIBLE);
     }
 
     @Test

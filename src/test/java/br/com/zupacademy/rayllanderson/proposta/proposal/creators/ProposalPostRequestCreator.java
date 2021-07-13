@@ -22,6 +22,15 @@ public class ProposalPostRequestCreator {
         return new ProposalPostRequest(document, email, name, address, salary);
     }
 
+    public static ProposalPostRequest createANotEligibleProposalToBeSavedWithCNPJ(){
+        String email = "Mikasa@zup.com.br";
+        String document = "37093601000104";
+        String name = "Mikasa Ackerman";
+        String address = "avenida qualquer, número 23232, Brasil";
+        double salary = 35000.0;
+        return new ProposalPostRequest(document, email, name, address, salary);
+    }
+
     public static ProposalPostRequest createProposalWithDocumentInvalid(){
         String email = "ray@zup.com.br";
         String document = "0147";
