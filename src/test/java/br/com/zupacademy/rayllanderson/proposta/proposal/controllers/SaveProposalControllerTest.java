@@ -4,8 +4,10 @@ import br.com.zupacademy.rayllanderson.proposta.proposal.creators.ProposalPostRe
 import br.com.zupacademy.rayllanderson.proposta.proposal.enums.ProposalStatus;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
 import br.com.zupacademy.rayllanderson.proposta.proposal.requests.ProposalPostRequest;
+import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalSaver;
 import br.com.zupacademy.rayllanderson.proposta.utils.HeaderUtils;
 import com.google.gson.Gson;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +42,15 @@ class SaveProposalControllerTest {
     @PersistenceContext
     private EntityManager manager;
 
+    private ProposalSaver proposalSaver;
+
     private final Gson gson = new Gson();
     private final String uri = "/proposals";
+
+    @BeforeEach
+    void setUp(){
+        this.proposalSaver = new ProposalSaver(mockMvc);
+    }
 
     @Test
     @DisplayName("Should save a new Proposal with CPF when successful")
@@ -54,6 +63,7 @@ class SaveProposalControllerTest {
                 .content(this.gson.toJson(request))
                 .contentType(MediaType.APPLICATION_JSON)
         )
+                .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(header().string(HttpHeaders.LOCATION, contextPath + "/proposals/1"))
                 .andReturn();
@@ -240,7 +250,7 @@ class SaveProposalControllerTest {
     void shouldReturn422WhenCPFExists() throws Exception {
 
         //salvando uma proposta com cpf válido
-        saveProposalWithCPF();
+        proposalSaver.saveProposalWithCPF();
 
         //tentando salvar uma proposta com o cpf da proposta salva acima (Já existente)
         ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
@@ -264,7 +274,7 @@ class SaveProposalControllerTest {
     void shouldReturn422WhenCNPJExists() throws Exception {
 
         //salvando uma proposta com CNPJ válido
-        saveProposalWithCNPJ();
+        proposalSaver.saveProposalWithCNPJ();
 
         //tentando salvar uma proposta com o CNPJ da proposta salva acima (Já existente)
         ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCNPJ();
@@ -281,15 +291,5 @@ class SaveProposalControllerTest {
                 .andExpect(jsonPath("globalErrorMessages").isArray())
                 .andExpect(jsonPath("globalErrorMessages.*", hasSize(1)))
                 .andExpect(jsonPath("globalErrorMessages[0]").value(containsString(expectedField)));
-    }
-
-    private void saveProposalWithCPF() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
-        mockMvc.perform(post(this.uri).content(this.gson.toJson(request)).contentType(MediaType.APPLICATION_JSON));
-    }
-
-    private void saveProposalWithCNPJ() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCNPJ();
-        mockMvc.perform(post(this.uri).content(this.gson.toJson(request)).contentType(MediaType.APPLICATION_JSON));
     }
 }

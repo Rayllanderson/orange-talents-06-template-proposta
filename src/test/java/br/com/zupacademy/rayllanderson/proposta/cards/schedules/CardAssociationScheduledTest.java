@@ -1,9 +1,9 @@
 package br.com.zupacademy.rayllanderson.proposta.cards.schedules;
 
-import br.com.zupacademy.rayllanderson.proposta.proposal.creators.ProposalPostRequestCreator;
 import br.com.zupacademy.rayllanderson.proposta.proposal.repository.ProposalRepository;
-import br.com.zupacademy.rayllanderson.proposta.proposal.requests.ProposalPostRequest;
+import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalSaver;
 import com.google.gson.Gson;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,15 +11,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @AutoConfigureTestDatabase
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class CardAssociationScheduledTest {
 
     @Value("${associate.card.fixed.delay}")
@@ -31,7 +31,14 @@ class CardAssociationScheduledTest {
     @Autowired
     private MockMvc mockMvc;
 
+    private ProposalSaver proposalSaver;
+
     private final Gson gson = new Gson();
+
+    @BeforeEach
+    void setUp(){
+        this.proposalSaver = new ProposalSaver(mockMvc);
+    }
 
     @Test
     @DisplayName("Should create a card to a proposal when proposal is eligible and haven't card")
@@ -41,7 +48,7 @@ class CardAssociationScheduledTest {
        assertThat(proposalRepository.findAllEligibleWithoutCard()).isNotNull().hasSize(0).isEmpty();
 
        //criando uma proposta elegível
-        saveEligibleProposalWithoutCard();
+        proposalSaver.saveEligibleProposalWithoutCard();
 
         //garantindo que agora tem uma proposta elegível
         assertThat(proposalRepository.findAllEligibleWithoutCard()).isNotNull().isNotEmpty().hasSize(1);
@@ -61,7 +68,7 @@ class CardAssociationScheduledTest {
         assertThat(proposalRepository.findAllEligibleWithoutCard()).isNotNull().hasSize(0).isEmpty();
 
         //criando uma proposta não elegível
-        saveNotEligibleProposal();
+        proposalSaver.saveNotEligibleProposal();
 
         //garantindo novamente que não existem propostas elegíveis, mesmo depois de salvar uma nova proposta (não elegível)
         assertThat(proposalRepository.findAllEligibleWithoutCard()).isNotNull().hasSize(0).isEmpty();
@@ -71,20 +78,5 @@ class CardAssociationScheduledTest {
 
         //confirmando que não existem propostas elegíveis mesmo depois que o scheduled foi executado
         assertThat(proposalRepository.findAllEligibleWithoutCard()).isNotNull().hasSize(0).isEmpty();
-    }
-
-
-    private void saveProposal(Object request) throws Exception {
-        mockMvc.perform(post("/proposals").content(this.gson.toJson(request)).contentType(MediaType.APPLICATION_JSON));
-    }
-
-    private void saveEligibleProposalWithoutCard() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
-        saveProposal(request);
-    }
-
-    private void saveNotEligibleProposal() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createANotEligibleProposalToBeSavedWithCNPJ();
-        saveProposal(request);
     }
 }
