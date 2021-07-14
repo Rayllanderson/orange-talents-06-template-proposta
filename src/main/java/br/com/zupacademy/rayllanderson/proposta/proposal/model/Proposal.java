@@ -1,5 +1,7 @@
 package br.com.zupacademy.rayllanderson.proposta.proposal.model;
 
+import br.com.zupacademy.rayllanderson.proposta.cards.model.Card;
+import br.com.zupacademy.rayllanderson.proposta.cards.responses.CardSolicitationResponse;
 import br.com.zupacademy.rayllanderson.proposta.core.annotations.CPFOrCNPJ;
 import br.com.zupacademy.rayllanderson.proposta.proposal.enums.ProposalStatus;
 import org.springframework.util.Assert;
@@ -40,6 +42,10 @@ public class Proposal {
     @Enumerated(EnumType.STRING)
     private ProposalStatus status;
 
+    @JoinColumn(unique = true)
+    @OneToOne(cascade = CascadeType.MERGE)
+    private Card card;
+
     @Deprecated
     private Proposal() {
     }
@@ -76,5 +82,15 @@ public class Proposal {
 
     public ProposalStatus getStatus() {
         return status;
+    }
+
+    /**
+     * Realiza a associação de cartão com a proposta.
+     * @param response não deve ser nulo.
+     */
+    public void assignCard(@NotNull CardSolicitationResponse response){
+        Assert.isTrue(this.status.equals(ProposalStatus.ELIGIBLE),
+                "Não é possível criar um cartão para uma proposta não elegível");
+        this.card = response.toModel(this);
     }
 }
