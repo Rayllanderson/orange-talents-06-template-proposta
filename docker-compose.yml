@@ -7,6 +7,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SYNC_LIMIT: 2
+    networks:
+      - propostas-network
 
   kafka:
     image: "confluentinc/cp-kafka:5.2.1"
@@ -21,6 +23,8 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - propostas-network
 
   postgres:
     image: 'postgres:alpine'
@@ -31,8 +35,10 @@ services:
     environment:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: keycloak
+      POSTGRES_MULTIPLE_DATABASES: keycloak, proposta
       POSTGRES_HOST: postgres
+    networks:
+      - propostas-network
 
   keycloak:
     image: jboss/keycloak
@@ -61,6 +67,8 @@ services:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: Pa55w0rd
       POSTGRES_PORT_5432_TCP_ADDR: 127.0.0.1
+    networks:
+      - propostas-network
 
   analise:
     image: 'zupacademy/analise-financeira'
@@ -71,6 +79,8 @@ services:
       LOG_LEVEL: INFO
       URL_SISTEMA_CARTAO: http://contas:8888/api/cartoes
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    networks:
+      - propostas-network
 
   contas:
     image: 'zupacademy/contas'
@@ -80,6 +90,8 @@ services:
       SERVER_PORT: 8888
       LOG_LEVEL: INFO
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    networks:
+      - propostas-network
 
   transacoes:
     image: 'zupacademy/transacoes'
@@ -92,6 +104,23 @@ services:
       LOG_LEVEL: INFO
       KAFKA_HOST: "kafka:29092"
       JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+    networks:
+      - propostas-network
+
+  proposta:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: rayllanderson/proposta
+    container_name: proposta
+    ports:
+      - 8081:8080
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/proposta
+    networks:
+      - propostas-network
+    depends_on:
+      - postgres
 
   jaeger:
     image: jaegertracing/all-in-one
@@ -106,6 +135,8 @@ services:
       - 9411:9411
     environment:
       COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+    networks:
+      - propostas-network
 
   prometheus:
     image: prom/prometheus
@@ -133,8 +164,14 @@ services:
       VAULT_DEV_ROOT_TOKEN_ID: ee413645-dbe8-4848-afc6-6bb2768ada75
       VAULT_TOKEN: ee413645-dbe8-4848-afc6-6bb2768ada75
       VAULT_ADDR: http://127.0.0.1:8200
+    networks:
+      - propostas-network
 
 volumes:
   grafana-volume:
   prometheus-volume:
   postgres-volume:
+
+networks:
+  propostas-network:
+    driver: bridge
