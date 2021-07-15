@@ -24,6 +24,7 @@ public class Biometry {
     @Column(nullable = false)
     private LocalDateTime createdIn = LocalDateTime.now();
 
+    @NotNull
     @ManyToOne(optional = false)
     private Card card;
 
