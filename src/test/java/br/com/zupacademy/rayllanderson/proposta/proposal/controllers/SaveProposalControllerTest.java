@@ -4,7 +4,7 @@ import br.com.zupacademy.rayllanderson.proposta.proposal.creators.ProposalPostRe
 import br.com.zupacademy.rayllanderson.proposta.proposal.enums.ProposalStatus;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
 import br.com.zupacademy.rayllanderson.proposta.proposal.requests.ProposalPostRequest;
-import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalSaver;
+import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalPostRequestSaver;
 import br.com.zupacademy.rayllanderson.proposta.utils.HeaderUtils;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,14 +42,14 @@ class SaveProposalControllerTest {
     @PersistenceContext
     private EntityManager manager;
 
-    private ProposalSaver proposalSaver;
+    private ProposalPostRequestSaver proposalSaver;
 
     private final Gson gson = new Gson();
     private final String uri = "/proposals";
 
     @BeforeEach
     void setUp(){
-        this.proposalSaver = new ProposalSaver(mockMvc);
+        this.proposalSaver = new ProposalPostRequestSaver(mockMvc);
     }
 
     @Test

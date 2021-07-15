@@ -1,7 +1,7 @@
 package br.com.zupacademy.rayllanderson.proposta.proposal.controllers;
 
 
-import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalSaver;
+import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalPostRequestSaver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,13 +25,13 @@ class CheckProposalStatusControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ProposalSaver proposalSaver;
+    private ProposalPostRequestSaver proposalSaver;
 
     private final String url = "/proposals";
 
     @BeforeEach
     void setUp(){
-        this.proposalSaver = new ProposalSaver(mockMvc);
+        this.proposalSaver = new ProposalPostRequestSaver(mockMvc);
     }
 
     @Test

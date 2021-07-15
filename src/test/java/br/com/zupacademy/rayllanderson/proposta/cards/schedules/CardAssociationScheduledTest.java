@@ -1,7 +1,7 @@
 package br.com.zupacademy.rayllanderson.proposta.cards.schedules;
 
 import br.com.zupacademy.rayllanderson.proposta.proposal.repository.ProposalRepository;
-import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalSaver;
+import br.com.zupacademy.rayllanderson.proposta.proposal.saver.ProposalPostRequestSaver;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -34,13 +34,13 @@ class CardAssociationScheduledTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ProposalSaver proposalSaver;
+    private ProposalPostRequestSaver proposalSaver;
 
     private final Gson gson = new Gson();
 
     @BeforeEach
     void setUp(){
-        this.proposalSaver = new ProposalSaver(mockMvc);
+        this.proposalSaver = new ProposalPostRequestSaver(mockMvc);
     }
 
     @Test

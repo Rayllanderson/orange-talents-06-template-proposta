@@ -1,5 +1,6 @@
 package br.com.zupacademy.rayllanderson.proposta.cards.model;
 
+import br.com.zupacademy.rayllanderson.proposta.biometrics.model.Biometry;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
 
 import javax.persistence.*;
@@ -7,6 +8,8 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Card {
@@ -38,6 +41,9 @@ public class Card {
     @OneToOne(mappedBy = "card")
     private Proposal proposal;
 
+    @OneToMany(mappedBy = "card")
+    private Set<Biometry> biometrics = new HashSet<>();
+
     @Deprecated
     private Card() {}
 
@@ -53,5 +59,9 @@ public class Card {
 
     public String getNumber() {
         return number;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

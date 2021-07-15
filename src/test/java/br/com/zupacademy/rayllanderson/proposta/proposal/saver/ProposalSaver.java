@@ -1,46 +1,24 @@
 package br.com.zupacademy.rayllanderson.proposta.proposal.saver;
 
-import br.com.zupacademy.rayllanderson.proposta.proposal.creators.ProposalPostRequestCreator;
-import br.com.zupacademy.rayllanderson.proposta.proposal.requests.ProposalPostRequest;
-import com.google.gson.Gson;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import br.com.zupacademy.rayllanderson.proposta.proposal.creators.ProposalCreator;
+import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import javax.persistence.EntityManager;
 
+@Component
 public class ProposalSaver {
 
-    private final MockMvc mockMvc;
+    @Autowired
+    private EntityManager manager;
 
-    private final Gson gson = new Gson();
-
-    public ProposalSaver(MockMvc mockMvc) {
-        this.mockMvc = mockMvc;
-    }
-
-    public void saveProposal(ProposalPostRequest request) throws Exception {
-        String uri = "/proposals";
-        mockMvc.perform(post(uri).content(this.gson.toJson(request)).contentType(MediaType.APPLICATION_JSON));
-    }
-
-    public void saveProposalWithCPF() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
-        saveProposal(request);
-    }
-
-    public void saveProposalWithCNPJ() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCNPJ();
-        saveProposal(request);
-    }
-
-    public void saveEligibleProposalWithoutCard() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
-        saveProposal(request);
-    }
-
-    public void saveNotEligibleProposal() throws Exception {
-        ProposalPostRequest request = ProposalPostRequestCreator.createANotEligibleProposalToBeSavedWithCNPJ();
-        saveProposal(request);
+    @Transactional
+    public Proposal saveNewProposal(){
+        Proposal proposalToBeSaved = ProposalCreator.createProposalToBeSaved();
+        manager.persist(proposalToBeSaved);
+        return proposalToBeSaved;
     }
 
 }
