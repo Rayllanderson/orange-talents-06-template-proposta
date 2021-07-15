@@ -22,7 +22,7 @@ public class ActuatorTest {
     private final String HEALTH_URL = "/actuator/health";
 
     @Test
-    @WithMockUser(roles = "ADMIN")
+    @WithMockUser(authorities = "SCOPE_actuator:read")
     @DisplayName("Should validate if the application is UP when authenticated user is admin")
     void shouldValidateIfTheApplicationIsUp() throws Exception {
         mockMvc.perform(get(HEALTH_URL))
@@ -31,7 +31,7 @@ public class ActuatorTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
+    @WithMockUser(authorities = "SCOPE_proposal:read")
     @DisplayName("Should return 403 when user is not an admin")
     void shouldReturn403WhenUserIsNotAuthorized() throws Exception {
         mockMvc.perform(get(HEALTH_URL))
