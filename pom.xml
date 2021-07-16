@@ -93,6 +93,10 @@
 			<artifactId>spring-security-oauth2-jose</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
 
 	</dependencies>
 
