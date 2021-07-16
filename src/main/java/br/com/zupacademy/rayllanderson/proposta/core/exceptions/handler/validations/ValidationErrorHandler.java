@@ -1,10 +1,11 @@
 package br.com.zupacademy.rayllanderson.proposta.core.exceptions.handler.validations;
 
-import br.com.zupacademy.rayllanderson.proposta.core.exceptions.UnprocessableEntityException;
+import br.com.zupacademy.rayllanderson.proposta.core.exceptions.ApiErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolationException;
 import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice
 public class ValidationErrorHandler {
@@ -50,12 +52,9 @@ public class ValidationErrorHandler {
         return validationErrors;
     }
 
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    @ExceptionHandler(UnprocessableEntityException.class)
-    public ValidationErrorOutputDto handleUnprocessableEntityException(UnprocessableEntityException exception){
-        ValidationErrorOutputDto validationErrors = new ValidationErrorOutputDto();
-        validationErrors.addError(exception.getMessage());
-        return validationErrors;
+    @ExceptionHandler(ApiErrorException.class)
+    public ResponseEntity<?> handleApiErrorResponseException(ApiErrorException exception){
+        return ResponseEntity.status(exception.getStatus()).body(Map.of("message", exception.getMessage()));
     }
 
     private ValidationErrorOutputDto buildValidationErrorOutputDto(List<ObjectError> globalErros, List<FieldError> fieldErrors) {

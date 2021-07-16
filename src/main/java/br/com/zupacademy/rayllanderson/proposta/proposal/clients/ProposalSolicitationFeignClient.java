@@ -5,7 +5,7 @@ import br.com.zupacademy.rayllanderson.proposta.proposal.responses.SolicitationR
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-@FeignClient(value = "solicitacao", url = "#{'${solicitacao.url}'}")
+@FeignClient(value = "solicitacao", url = "#{'${api.solicitations.url}'}")
 public interface ProposalSolicitationFeignClient {
 
     @PostMapping

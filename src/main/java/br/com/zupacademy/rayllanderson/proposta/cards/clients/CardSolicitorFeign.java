@@ -5,7 +5,7 @@ import br.com.zupacademy.rayllanderson.proposta.cards.responses.CardSolicitation
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
-@FeignClient(value = "card-number-solicitation", url = "#{'${card.number.solicitation.url}'}")
+@FeignClient(value = "card-number-solicitation", url = "#{'${api.cards.url}'}")
 public interface CardSolicitorFeign {
 
     @PostMapping

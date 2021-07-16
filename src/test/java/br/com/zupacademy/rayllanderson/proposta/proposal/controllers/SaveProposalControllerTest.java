@@ -266,9 +266,7 @@ class SaveProposalControllerTest {
         ).andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("globalErrorMessages").isArray())
-                .andExpect(jsonPath("globalErrorMessages.*", hasSize(1)))
-                .andExpect(jsonPath("globalErrorMessages[0]").value(containsString(expectedField)));
+                .andExpect(jsonPath("message").value(containsString(expectedField)));
     }
 
     @Test
@@ -290,8 +288,6 @@ class SaveProposalControllerTest {
         ).andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("globalErrorMessages").isArray())
-                .andExpect(jsonPath("globalErrorMessages.*", hasSize(1)))
-                .andExpect(jsonPath("globalErrorMessages[0]").value(containsString(expectedField)));
+                .andExpect(jsonPath("message").value(containsString(expectedField)));
     }
 }

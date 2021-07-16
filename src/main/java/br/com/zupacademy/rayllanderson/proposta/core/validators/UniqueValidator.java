@@ -1,7 +1,8 @@
 package br.com.zupacademy.rayllanderson.proposta.core.validators;
 
 import br.com.zupacademy.rayllanderson.proposta.core.annotations.Unique;
-import br.com.zupacademy.rayllanderson.proposta.core.exceptions.UnprocessableEntityException;
+import br.com.zupacademy.rayllanderson.proposta.core.exceptions.ApiErrorException;
+import org.springframework.http.HttpStatus;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -32,7 +33,7 @@ public class UniqueValidator implements ConstraintValidator<Unique, Object> {
         if (fieldValue == null || fieldValue.equals("")) return false;
         String jpql = "SELECT 1 FROM " + clazz.getName() + " WHERE " + field + " = :field";
         List<?> result = em.createQuery(jpql).setParameter("field", fieldValue).getResultList();
-        if (result.size() > 0) throw new UnprocessableEntityException(field + " já está cadastrado no sistema.");
+        if (result.size() > 0) throw new ApiErrorException(HttpStatus.UNPROCESSABLE_ENTITY, field + " já está cadastrado no sistema.");
         return true;
     }
 }
