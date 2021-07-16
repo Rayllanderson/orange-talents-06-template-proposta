@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ConstraintViolationException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -30,6 +31,15 @@ public class ValidationErrorHandler {
         List<ObjectError> globalErros = exception.getBindingResult().getGlobalErrors();
         List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
         return buildValidationErrorOutputDto(globalErros, fieldErrors);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ValidationErrorOutputDto handleConstraintViolationException(ConstraintViolationException exception){
+        ValidationErrorOutputDto validationErrors = new ValidationErrorOutputDto();
+        exception.getConstraintViolations()
+                .forEach(err -> validationErrors.addFieldError(err.getPropertyPath().toString(), err.getMessage()));
+        return validationErrors;
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
