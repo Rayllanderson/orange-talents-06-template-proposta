@@ -27,4 +27,13 @@ public class CardSaver {
         manager.persist(newCard);
         return newCard;
     }
+
+    @Transactional
+    public Card saveNewCardBlocked(){
+        Proposal newProposal = proposalSaver.saveNewProposal();
+        Card newCard = CardCreator.createCardToBeSaved(newProposal);
+        newCard.block("192.168.0.0", "Chrome");
+        manager.persist(newCard);
+        return newCard;
+    }
 }

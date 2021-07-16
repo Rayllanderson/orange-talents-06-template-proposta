@@ -1,15 +1,17 @@
 package br.com.zupacademy.rayllanderson.proposta.cards.model;
 
 import br.com.zupacademy.rayllanderson.proposta.biometrics.model.Biometry;
+import br.com.zupacademy.rayllanderson.proposta.cards.block.model.CardBlock;
+import br.com.zupacademy.rayllanderson.proposta.cards.enums.CardStatus;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 public class Card {
@@ -44,6 +46,12 @@ public class Card {
     @OneToMany(mappedBy = "card")
     private Set<Biometry> biometrics = new HashSet<>();
 
+    @Enumerated(EnumType.STRING)
+    private CardStatus status = CardStatus.UNBLOCKED;
+
+    @OneToMany(mappedBy = "card", cascade = CascadeType.MERGE)
+    List<CardBlock> blocks = new ArrayList<>();
+
     @Deprecated
     private Card() {}
 
@@ -63,5 +71,33 @@ public class Card {
 
     public Long getId() {
         return id;
+    }
+
+    public boolean isBlocked() {
+        return this.status.equals(CardStatus.BLOCKED);
+    }
+
+    /**
+     * Retorna a lista de bloqueios do cartão.
+     * OBS: Read only
+     */
+    public List<CardBlock> getBlocks() {
+        return Collections.unmodifiableList(blocks);
+    }
+
+    /**
+     * Realiza o bloqueio do cartão.
+     * @param ip não deve ser vazio ou nulo
+     * @param userAgent não deve ser vazio ou nulo
+     */
+    public void block(@NotBlank String ip, @NotBlank String userAgent) {
+        Assert.state(!isBlocked(), "Não pode bloquear um cartão já bloqueado");
+        Assert.state(ip != null, "Não é possível bloquear um cartão sem um ip");
+        Assert.state(userAgent != null, "Não é possível bloquear um cartão sem o User agent");
+        Assert.state(!ip.isBlank(), "Não é possível bloquear um cartão sem um ip");
+        Assert.state(!userAgent.isBlank(), "Não é possível bloquear um cartão sem o User agent");
+
+        this.status = CardStatus.BLOCKED;
+        this.blocks.add(new CardBlock(ip, userAgent, this));
     }
 }
