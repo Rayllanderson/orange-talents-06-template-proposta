@@ -3,6 +3,7 @@ package br.com.zupacademy.rayllanderson.proposta.cards.block.controllers;
 import br.com.zupacademy.rayllanderson.proposta.cards.block.clients.BlockNotificatorFeign;
 import br.com.zupacademy.rayllanderson.proposta.cards.model.Card;
 import br.com.zupacademy.rayllanderson.proposta.core.exceptions.ApiErrorException;
+import br.com.zupacademy.rayllanderson.proposta.utils.Assert;
 import feign.FeignException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,7 @@ public class CardBlockerController {
     public ResponseEntity<?> block(HttpServletRequest request, @PathVariable Long id){
         String ip = request.getRemoteAddr();
         String userAgent = request.getHeader(HttpHeaders.USER_AGENT);
-        assertNotNull(ip, userAgent);
+        Assert.notNull(ip, userAgent);
 
         Card card = Optional.ofNullable(manager.find(Card.class, id)).orElseThrow(() ->
             new ResponseStatusException(HttpStatus.NOT_FOUND, "O cartão não existe")
@@ -70,15 +71,6 @@ public class CardBlockerController {
         } catch (FeignException e){
             logger.error("Não foi possível notificar o bloqueio do cartão para o sistema externo.");
             throw new ApiErrorException(HttpStatus.BAD_GATEWAY, "Não foi possível realizar o bloqueio do cartão nesse momento");
-        }
-    }
-
-    private void assertNotNull(String ip, String userAgent){
-        if(ip == null || userAgent == null){
-            throw new ApiErrorException(HttpStatus.BAD_REQUEST, "Endereço ip ou user agent não podem ser nulos");
-        }
-        if (ip.isBlank() || userAgent.isBlank()){
-            throw new ApiErrorException(HttpStatus.BAD_REQUEST, "Endereço ip ou user agent não podem ser vazios");
         }
     }
 }
