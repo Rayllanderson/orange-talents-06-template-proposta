@@ -2,14 +2,19 @@ package br.com.zupacademy.rayllanderson.proposta.travel.controllers;
 
 
 import br.com.zupacademy.rayllanderson.proposta.cards.savers.CardSaver;
+import br.com.zupacademy.rayllanderson.proposta.travel.clients.TravelNotifyExternalFeign;
 import br.com.zupacademy.rayllanderson.proposta.travel.creators.TravelNotifyRequestCreator;
+import br.com.zupacademy.rayllanderson.proposta.travel.request.TravelNotifyExternalRequest;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
@@ -33,10 +38,16 @@ class CreateTravelNotifyControllerTest {
 
     private final Gson gson = new Gson();
 
+    @MockBean
+    private TravelNotifyExternalFeign notificator;
+
     @Test
     @DisplayName("Should create a new travel notify when successful")
     void shouldCreateTravelNotifyWhenSuccessful() throws Exception {
         cardSaver.saveNewCard();
+
+        BDDMockito.when(notificator.notify(ArgumentMatchers.anyString(),
+                ArgumentMatchers.any(TravelNotifyExternalRequest.class))).thenReturn("");
 
         var traveNotifyToBeSaved = TravelNotifyRequestCreator.createTraveNotifyRequestToBeSaved();
 
