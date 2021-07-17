@@ -4,36 +4,31 @@ import br.com.zupacademy.rayllanderson.proposta.cards.model.Card;
 import br.com.zupacademy.rayllanderson.proposta.travel.model.TravelNotify;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
-public class TravelNotifyRequest {
+public class TravelNotifyExternalRequest {
 
     @NotBlank
+    @JsonProperty("destino")
     private final String destination;
 
     @NotNull @Future
-    @JsonFormat(pattern = "dd-MM-yyyy", shape = JsonFormat.Shape.STRING)
-    private final LocalDate endDate;
+    @JsonProperty("validoAte")
+    private final String endDate;
 
     @JsonCreator
-    public TravelNotifyRequest(LocalDate endDate, String destination) {
-        this.endDate = endDate;
+    public TravelNotifyExternalRequest(LocalDate endDate, String destination) {
+        this.endDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(endDate);
         this.destination = destination;
     }
 
-    public TravelNotify toModel(String ip, String userAgent, Card card) {
-        return new TravelNotify(userAgent, ip, destination, endDate, card);
-    }
-
-    public String getDestination() {
-        return destination;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
+    public static TravelNotifyExternalRequest fromTravelNotifyRequest(TravelNotifyRequest request){
+        return new TravelNotifyExternalRequest(request.getEndDate(), request.getDestination());
     }
 }
