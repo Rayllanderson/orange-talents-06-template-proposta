@@ -4,6 +4,7 @@ import br.com.zupacademy.rayllanderson.proposta.biometrics.model.Biometry;
 import br.com.zupacademy.rayllanderson.proposta.cards.block.model.CardBlock;
 import br.com.zupacademy.rayllanderson.proposta.cards.enums.CardStatus;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
+import br.com.zupacademy.rayllanderson.proposta.wallet.models.PayPalWallet;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
@@ -52,6 +53,9 @@ public class Card {
     @OneToMany(mappedBy = "card", cascade = CascadeType.MERGE)
     List<CardBlock> blocks = new ArrayList<>();
 
+    @OneToOne(mappedBy = "card")
+    private PayPalWallet paypal;
+
     @Deprecated
     private Card() {}
 
@@ -99,5 +103,32 @@ public class Card {
 
         this.status = CardStatus.BLOCKED;
         this.blocks.add(new CardBlock(ip, userAgent, this));
+    }
+
+    private boolean hasPaypal(){
+        return this.paypal != null;
+    }
+
+    /**
+     * @return True caso associe com sucesso. False caso já tenha associado.
+     */
+    public boolean associatePaypal(@NotNull PayPalWallet wallet){
+        Assert.notNull(wallet, "Não é possível associar ao cartão uma carteira paypal vazia.");
+        if(hasPaypal()) return false;
+        this.paypal = wallet;
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Card card = (Card) o;
+        return Objects.equals(id, card.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
