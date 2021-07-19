@@ -1,5 +1,6 @@
 package br.com.zupacademy.rayllanderson.proposta.proposal.controllers;
 
+import br.com.zupacademy.rayllanderson.proposta.core.security.ProposalDocumentEncryptor;
 import br.com.zupacademy.rayllanderson.proposta.proposal.creators.ProposalPostRequestCreator;
 import br.com.zupacademy.rayllanderson.proposta.proposal.enums.ProposalStatus;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
@@ -10,12 +11,16 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -26,10 +31,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.hamcrest.Matchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,6 +54,13 @@ class SaveProposalControllerTest {
 
     private final Gson gson = new Gson();
     private final String uri = "/proposals";
+
+    @Spy
+    @InjectMocks
+    private ProposalDocumentEncryptor encryptor;
+    @Spy
+    @InjectMocks
+    private Encryptors encryptors;
 
     @BeforeEach
     void setUp(){
@@ -251,13 +264,16 @@ class SaveProposalControllerTest {
     @DisplayName("Should return 422 (unprocessable entity) when CPF already exists")
     void shouldReturn422WhenCPFExists() throws Exception {
 
+
+        BDDMockito.when(encryptor.encryptTEST("1234")).thenReturn("15469fe01a75ad6a23326639e92");
+
         //salvando uma proposta com cpf válido
         proposalSaver.saveProposalWithCPF();
 
         //tentando salvar uma proposta com o cpf da proposta salva acima (Já existente)
         ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCPF();
 
-        String expectedField = "document";
+        String expectedField = "Documento";
 
         mockMvc.perform(
                 post(this.uri)
@@ -273,13 +289,15 @@ class SaveProposalControllerTest {
     @DisplayName("Should return 422 (unprocessable entity) when CNPJ already exists")
     void shouldReturn422WhenCNPJExists() throws Exception {
 
+        BDDMockito.when(encryptor.encryptTEST("1234")).thenReturn("15469fe01a75ad6a23326639e92");
+
         //salvando uma proposta com CNPJ válido
         proposalSaver.saveProposalWithCNPJ();
 
         //tentando salvar uma proposta com o CNPJ da proposta salva acima (Já existente)
         ProposalPostRequest request = ProposalPostRequestCreator.createAValidProposalToBeSavedWithCNPJ();
 
-        String expectedField = "document";
+        String expectedField = "Documento";
 
         mockMvc.perform(
                 post(this.uri)
