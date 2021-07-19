@@ -35,4 +35,8 @@ public class ProposalPostRequest {
     public Proposal toModel(){
         return new Proposal(document, email, name, address, salary);
     }
+
+    public String getDocument() {
+        return document;
+    }
 }
