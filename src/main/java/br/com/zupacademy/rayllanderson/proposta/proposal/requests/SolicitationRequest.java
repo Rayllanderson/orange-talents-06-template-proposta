@@ -1,6 +1,7 @@
 package br.com.zupacademy.rayllanderson.proposta.proposal.requests;
 
 import br.com.zupacademy.rayllanderson.proposta.core.annotations.CPFOrCNPJ;
+import br.com.zupacademy.rayllanderson.proposta.core.security.ProposalDocumentEncryptor;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

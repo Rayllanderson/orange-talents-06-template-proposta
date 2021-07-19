@@ -2,6 +2,7 @@ package br.com.zupacademy.rayllanderson.proposta.proposal.requests;
 
 import br.com.zupacademy.rayllanderson.proposta.core.annotations.CPFOrCNPJ;
 import br.com.zupacademy.rayllanderson.proposta.core.annotations.Unique;
+import br.com.zupacademy.rayllanderson.proposta.core.annotations.UniqueDocument;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
 
 import javax.validation.constraints.Email;
@@ -18,7 +19,7 @@ public class ProposalPostRequest {
     @NotBlank @Email
     private final String email;
     @NotBlank @CPFOrCNPJ
-    @Unique(entity = Proposal.class, field = "document")
+    @UniqueDocument
     private final String document;
     @NotNull @Positive
     private final Double salary;

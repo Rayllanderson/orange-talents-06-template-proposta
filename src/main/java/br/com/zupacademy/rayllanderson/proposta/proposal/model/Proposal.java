@@ -3,6 +3,7 @@ package br.com.zupacademy.rayllanderson.proposta.proposal.model;
 import br.com.zupacademy.rayllanderson.proposta.cards.model.Card;
 import br.com.zupacademy.rayllanderson.proposta.cards.responses.CardSolicitationResponse;
 import br.com.zupacademy.rayllanderson.proposta.core.annotations.CPFOrCNPJ;
+import br.com.zupacademy.rayllanderson.proposta.core.security.ProposalDocumentEncryptor;
 import br.com.zupacademy.rayllanderson.proposta.proposal.enums.ProposalStatus;
 import org.springframework.util.Assert;
 
@@ -19,7 +20,7 @@ public class Proposal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank @CPFOrCNPJ
+    @NotBlank
     @Column(nullable = false)
     private String document;
 
@@ -52,7 +53,7 @@ public class Proposal {
 
     public Proposal(@NotBlank @CPFOrCNPJ String document, @NotBlank String email, @NotBlank String name,
                     @NotBlank String address, @NotNull @Positive Double salary) {
-        this.document = document;
+        this.document = ProposalDocumentEncryptor.encrypt(document);
         this.email = email;
         this.name = name;
         this.address = address;
@@ -64,7 +65,7 @@ public class Proposal {
     }
 
     public String getDocument() {
-        return document;
+        return ProposalDocumentEncryptor.decrypt(document);
     }
 
     public String getName() {
