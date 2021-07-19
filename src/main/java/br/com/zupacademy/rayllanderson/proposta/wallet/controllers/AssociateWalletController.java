@@ -3,7 +3,8 @@ package br.com.zupacademy.rayllanderson.proposta.wallet.controllers;
 import br.com.zupacademy.rayllanderson.proposta.cards.model.Card;
 import br.com.zupacademy.rayllanderson.proposta.core.exceptions.ApiErrorException;
 import br.com.zupacademy.rayllanderson.proposta.wallet.clients.CardAssociatorFeign;
-import br.com.zupacademy.rayllanderson.proposta.wallet.models.PayPalWallet;
+import br.com.zupacademy.rayllanderson.proposta.wallet.enums.WalletName;
+import br.com.zupacademy.rayllanderson.proposta.wallet.models.Wallet;
 import br.com.zupacademy.rayllanderson.proposta.wallet.requests.WalletExternalRequest;
 import br.com.zupacademy.rayllanderson.proposta.wallet.requests.WalletRequest;
 import feign.FeignException;
@@ -39,27 +40,40 @@ public class AssociateWalletController {
     @PostMapping("/{id}/associate/paypal")
     public ResponseEntity<?> associatePaypal(@PathVariable Long id, @RequestBody @Valid WalletRequest request,
                                              UriComponentsBuilder builder){
+        return process(id, request, WalletName.PAYPAL, builder);
+    }
+
+    @Transactional
+    @PostMapping("/{id}/associate/samsung-pay")
+    public ResponseEntity<?> associateSamsungPay(@PathVariable Long id, @RequestBody @Valid WalletRequest request,
+                                             UriComponentsBuilder builder){
+        return process(id, request, WalletName.SAMSUNG_PAY, builder);
+    }
+
+    private ResponseEntity<?> process(Long id, WalletRequest request, WalletName walletName, UriComponentsBuilder builder) {
 
         Card card = Optional.ofNullable(manager.find(Card.class, id)).orElseThrow(() -> {
-            logger.warn("Tentativa de associação do cartão de id {} com paypal falhou. Motivo: Cartão não existe", id);
+            logger.warn("Tentativa de associação do cartão de id {} com {} falhou. Motivo: Cartão não existe", id, walletName);
             throw new ApiErrorException(HttpStatus.NOT_FOUND, "Cartão não encontrado");
         });
 
-        PayPalWallet wallet = new PayPalWallet(request.getEmail(), card);
+        Wallet wallet = new Wallet(walletName, request.getEmail(), card);
 
-        boolean hasAlreadyAssociated = !card.associatePaypal(wallet);
+        boolean hasAlreadyAssociated = !card.associateWallet(wallet);
         if(hasAlreadyAssociated){
-            logger.warn("Tentativa de associação do cartão de id {} com paypal falhou. " +
-                    "Motivo: Cartão já está associado com Paypal", id);
-            throw new ApiErrorException(HttpStatus.UNPROCESSABLE_ENTITY, "Cartão já está associado com Paypal");
+            logger.warn("Tentativa de associação do cartão de id {} com {} falhou. " +
+                    "Motivo: Cartão já está associado com {}", id, walletName, walletName);
+            throw new ApiErrorException(HttpStatus.UNPROCESSABLE_ENTITY, "Cartão já está associado com "
+                    + walletName.getEndpointValue());
         }
 
-        tryAssociateCardInExternalService(card.getNumber(), wallet.getEmail(), "Paypal");
+        tryAssociateCardInExternalService(card.getNumber(), wallet.getEmail(), walletName.toString());
 
         manager.persist(wallet);
-        logger.info("Cartão id {} foi associado com paypal com sucesso! id paypal -> {}", id, wallet.getId());
+        logger.info("Cartão id {} foi associado com {} com sucesso! id -> {}", id, walletName, wallet.getId());
 
-        URI uri = builder.path("/cards/{id}/wallets/paypal/{paypalId}").build(id, wallet.getId());
+        URI uri = builder.path("/cards/{id}/wallets/{walletName}/{walletId}")
+                .build(id, walletName.getEndpointValue(), wallet.getId());
         return ResponseEntity.created(uri).build();
     }
 
@@ -69,7 +83,8 @@ public class AssociateWalletController {
             associator.associate(cardNumber, request);
         } catch (FeignException e){
             logger.error("Não foi possível associar o cartão ao {}. Erro no sistema externo. Status {}", walletName, e.status());
-            throw new ApiErrorException(HttpStatus.BAD_GATEWAY, "Não foi possível realizar a associação nesse momento. Tente mais tarde");
+            throw new ApiErrorException(HttpStatus.BAD_GATEWAY, "Não foi possível realizar a associação nesse momento. " +
+                    "Tente mais tarde");
         }
 
     }

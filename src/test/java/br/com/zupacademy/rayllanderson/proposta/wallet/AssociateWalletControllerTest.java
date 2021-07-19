@@ -5,7 +5,7 @@ import br.com.zupacademy.rayllanderson.proposta.cards.savers.CardSaver;
 import br.com.zupacademy.rayllanderson.proposta.core.exceptions.ApiErrorException;
 import br.com.zupacademy.rayllanderson.proposta.utils.HeaderUtils;
 import br.com.zupacademy.rayllanderson.proposta.wallet.clients.CardAssociatorFeign;
-import br.com.zupacademy.rayllanderson.proposta.wallet.models.PayPalWallet;
+import br.com.zupacademy.rayllanderson.proposta.wallet.models.Wallet;
 import br.com.zupacademy.rayllanderson.proposta.wallet.requests.WalletExternalRequest;
 import br.com.zupacademy.rayllanderson.proposta.wallet.requests.WalletRequest;
 import com.google.gson.Gson;
@@ -84,7 +84,46 @@ class AssociateWalletControllerTest {
 
         assertThat(returnedId).isNotNull();
 
-        PayPalWallet savedWallet = manager.find(PayPalWallet.class, returnedId);
+        var savedWallet = manager.find(Wallet.class, returnedId);
+
+        assertThat(savedWallet).isNotNull();
+        assertThat(savedWallet.getEmail()).isEqualTo(expectedEmail);
+        assertThat(savedWallet.getCard()).isEqualTo(expectedCard);
+    }
+
+    @Test
+    @DisplayName("Should associate card with Samsung Pay when Successful")
+    void shouldAssociateCardWithSamsungPay() throws Exception {
+        Card expectedCard = cardSaver.saveNewCard();
+
+        BDDMockito.when(associator.associate(ArgumentMatchers.anyString(),
+                ArgumentMatchers.any(WalletExternalRequest.class)))
+                .thenReturn(ResponseEntity.ok().build());
+
+        String expectedEmail = "sam@email.com";
+        var request = new WalletRequest(expectedEmail);
+
+        long expectedPaypalId = 1;
+        String contextPath = "http://localhost";
+        String expectedHeaderLocation = contextPath + "/cards/" + expectedCardId + "/wallets/samsung-pay/" +expectedPaypalId;
+
+        String url = "/cards/" + expectedCardId + "/associate/samsung-pay";
+        MvcResult mvcResult = mockMvc.perform(post(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(request))
+        ).andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.LOCATION, expectedHeaderLocation))
+                .andReturn();
+
+        String returnedHeader = mvcResult.getResponse().getHeader(HttpHeaders.LOCATION);
+
+        assertThat(returnedHeader).isNotNull().isNotBlank();
+
+        long returnedId = HeaderUtils.getReturnedId(returnedHeader);
+
+        assertThat(returnedId).isNotNull();
+
+        var savedWallet = manager.find(Wallet.class, returnedId);
 
         assertThat(savedWallet).isNotNull();
         assertThat(savedWallet.getEmail()).isEqualTo(expectedEmail);

@@ -4,7 +4,7 @@ import br.com.zupacademy.rayllanderson.proposta.biometrics.model.Biometry;
 import br.com.zupacademy.rayllanderson.proposta.cards.block.model.CardBlock;
 import br.com.zupacademy.rayllanderson.proposta.cards.enums.CardStatus;
 import br.com.zupacademy.rayllanderson.proposta.proposal.model.Proposal;
-import br.com.zupacademy.rayllanderson.proposta.wallet.models.PayPalWallet;
+import br.com.zupacademy.rayllanderson.proposta.wallet.models.Wallet;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
@@ -51,10 +51,10 @@ public class Card {
     private CardStatus status = CardStatus.UNBLOCKED;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.MERGE)
-    List<CardBlock> blocks = new ArrayList<>();
+    private List<CardBlock> blocks = new ArrayList<>();
 
-    @OneToOne(mappedBy = "card")
-    private PayPalWallet paypal;
+    @OneToMany(mappedBy = "card")
+    private Set<Wallet> wallets;
 
     @Deprecated
     private Card() {}
@@ -105,17 +105,17 @@ public class Card {
         this.blocks.add(new CardBlock(ip, userAgent, this));
     }
 
-    private boolean hasPaypal(){
-        return this.paypal != null;
+    private boolean hasWallet(Wallet wallet){
+        return this.wallets.contains(wallet);
     }
 
     /**
      * @return True caso associe com sucesso. False caso já tenha associado.
      */
-    public boolean associatePaypal(@NotNull PayPalWallet wallet){
-        Assert.notNull(wallet, "Não é possível associar ao cartão uma carteira paypal vazia.");
-        if(hasPaypal()) return false;
-        this.paypal = wallet;
+    public boolean associateWallet(@NotNull Wallet wallet){
+        Assert.notNull(wallet, "Não é possível associar uma carteira vazia ao cartão.");
+        if(hasWallet(wallet)) return false;
+        this.wallets.add(wallet);
         return true;
     }
 
